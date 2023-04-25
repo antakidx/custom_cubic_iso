@@ -1,0 +1,146 @@
+Run Cubic
+Select a directory to store all data
+Select the ubuntu iso you desire
+Under the "Custom Disk..." column (right-side column), do the following:
+	In the "Filename" field, delete "ubuntu-" and add "advantech-" (ie my final result was "advantech-20.04.6-2023.04.17-desktop-amd64.iso")
+	In the "Disk Name" field, add "Advantech-" in front of everything (ie my final result was Advantech-Ubuntu 20.04.6 2023.04.17 LTS "Custom Focal Fossa")
+Once in the virtual environment, copy the following commands EXACTLY:
+
+
+mkdir /etc/skel/.config/
+mkdir /etc/skel/.config/autostart/
+apt update
+apt install gcc
+nano /etc/skel/ExecuteScript.sh	***copy contents of ExecuteScript.sh***
+nano /etc/skel/ProgramExecuteScript.c		***copy contents of ProgramExecuteScript.c***
+chmod +x /etc/skel/ExecuteScript.sh
+chown root /etc/skel/ExecuteScript.sh
+chmod 4755 /etc/skel/ExecuteScript.sh
+chmod +x /etc/skel/ProgramExecuteScript.c
+chown root.root /etc/skel/ProgramExecuteScript.c
+chmod 4755 /etc/skel/ProgramExecuteScript.c
+cd /etc/skel/
+gcc ProgramExecuteScript.c -o Program
+chmod +x Program
+chown root.root Program
+chmod 4755 Program
+cd ..
+cd ..
+cd ~
+nano /etc/skel/.config/autostart/ExecuteScriptDesktop.desktop	***copy contents of ExecuteScriptDesktop.desktop***
+chmod +x /etc/skel/.config/autostart/ExecuteScriptDesktop.desktop
+chown root /etc/skel/.config/autostart/ExecuteScriptDesktop.desktop
+chmod 4755 /etc/skel/.config/autostart/ExecuteScriptDesktop.desktop
+
+
+Hit "Next" button to exit virtual environment
+Unless you want to mess with installed/uninstalled packages, I would recommend just hitting "Next" button again
+Hit "Next" button
+I would stick with the default compression which is .gzip
+Hit generate button
+Once everything is done, copy the newly created iso to a USB stick
+Plug USB stick into a machine with Windows on it
+Copy iso from USB stick to somewhere on the machine
+Use Rufus to burn the iso onto a different USB stick (do GPT scheme with FAT32 file system)
+Take the burned USB stick and plug it into a machine with Linux on it
+Run Gparted
+In top right corner, select the /dev that your USB is (if you are unsure just look at the GB size)
+Right click on the main partition and unmount it
+Right click on the main partition and select the "Resize/Move" option
+In the "Free Space Following" field, type anywhere from 1000-5000 (pending how much space is desired) and press enter button
+Click the "Resize/Move" button
+In the newly created space (labeled "unallocated"), right click and select the "New" option
+Leave everything default, but change the file system field to fat32
+Under the top menu, there will be a green checkmark; you MUST click this to apply the partition changes
+Click green check mark and wait for changes to take place (can take anywhere from a few seconds to an hour)
+After operations have completed, close out of Gparted, open your file explorer, right click on the USB stick and click the "Eject" option
+Take your USB stick out and plug it back into a machine with Windows on it
+
+Edit configuration files on the USB stick doing EXACTLY the following:
+***Steps taken from askubuntu.com/questions/1231734/disable-ubuntu-20-04-disk-checkup-every-boot
+
+	Open Windows File Explorer and click on the USB stick
+	Click on the "boot" folder, then "grub" folder, then open "grub.cfg"
+	Look for the line that says "set timeout"... change the number from whatever is default to 2 (the line should now read "set timeout=2")
+	Below this "set timeout" line should be the default Ubuntu grub menu entry... delete "maybe-ubiquity" near the end of the line and type "fsck.mode=skip" in its place... the menu entry should look like the following after you have made the changes:
+			
+			
+menuentry "Ubuntu" {
+	set gfxpayload=keep
+	linux	/casper/vmlinuz boot=casper  file=/cdrom/preseed/ubuntu.seed fsck.mode=skip quiet splash ---
+	initrd	/casper/initrd.lz
+}
+	
+	
+	Save all changes, then close "grub.cfg"
+	Click on the USB stick again
+	Click on the "isolinux" folder, then scroll to near the bottom and find "txt.cfg", then open "txt.cfg"
+	In the first menu label entry listed, go to the end of the line that begins with "append" and add "fsck.mode=skip" before "quiet splash ---" ... the menu entry should now look like the following after you have made the changes:
+	
+	
+menu label ^Try Ubuntu without installing
+ kernel /casper/vmlinuz
+ append  file=/cdrom/preseed/ubuntu.seed initrd=/casper/initrd.lz boot=casper fsck.mode=skip quiet splash ---
+	
+	
+	Save all changes, then close "txt.cfg"
+	Click on the USB stick again
+	Open "syslinux.cfg"
+	Delete the contents of the file and replace with the following code:
+	
+		
+default persistent
+label persistent
+  say Booting an Ubuntu Persistent session...
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/ubuntu.seed boot=casper persistent initrd=/casper/initrd quiet splash noprompt --
+		
+		
+	Save all changes, then close "syslinux.cfg"
+	Right click on the USB stick and click the "Eject" option from the menu
+	Take the USB stick out and it is now ready
+
+NOTE: use a text editor that supports Linux line endings to develop your script.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
